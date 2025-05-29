@@ -1,304 +1,420 @@
-<script type="text/javascript">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horizon World Driving - Funbooster SRL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #232323;
+            color: #ffffff;
+            scroll-behavior: smooth; /* Enable smooth scrolling */
+            padding-top: 80px; /* Offset for fixed header */
+        }
+
+        .hero-bg {
+            background-image: url('Images/backround.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; /* Base for parallax effect */
+        }
+
+        .panel {
+            background-color: #000000;
+        }
+
+        .custom-btn {
+            background-color: #F72F6C;
+            transition: transform 0.3s ease, background-color 0.3s ease; /* Slower transition for smoother hover */
+        }
+
+            .custom-btn:hover {
+                background-color: #E11F5C;
+                transform: scale(1.02); /* Subtle scale-up on hover */
+            }
+
+            .custom-btn:active {
+                transform: scale(0.98); /* Subtle bounce effect on click */
+                transition: transform 0.1s ease; /* Quick bounce */
+            }
+
+        .nav-link {
+            transition: color 0.2s ease, transform 0.2s ease; /* Smooth transition for nav links */
+        }
+
+            .nav-link:hover {
+                color: #F72F6C;
+                transform: translateY(-2px); /* Subtle lift on hover */
+            }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50; /* Ensure nav bar stays above other content */
+            background-color: rgba(0, 0, 0, 0.9); /* Semi-transparent black */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+        }
+
+        .appstore-img {
+            transition: transform 0.5s ease; /* Slow scaling for App Store image */
+        }
+
+            .appstore-img:hover {
+                transform: scale(1.05); /* Subtle image scale on hover */
+            }
+    </style>
+</head>
+<body class="font-sans">
+    <!-- File Handling Script -->
+    <script type="text/javascript">
         var gk_isXlsx = false;
         var gk_xlsxFileLookup = {};
         var gk_fileData = {};
         function filledCell(cell) {
-          return cell !== '' && cell != null;
+            return cell !== '' && cell != null;
         }
         function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
+            if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+                try {
+                    var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                    var firstSheetName = workbook.SheetNames[0];
+                    var worksheet = workbook.Sheets[firstSheetName];
+                    var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                    var filteredData = jsonData.filter(row => row.some(filledCell));
+                    var headerRowIndex = filteredData.findIndex((row, index) =>
+                        row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                    );
+                    if (headerRowIndex === -1 || headerRowIndex > 25) {
+                        headerRowIndex = 0;
+                    }
+                    var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
+                    csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                    return csv;
+                } catch (e) {
+                    console.error(e);
+                    return "";
                 }
+            }
+            return gk_fileData[filename] || "";
+        }
+    </script>
 
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
+    <!-- Header -->
+    <header class="panel text-white py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold">Horizon World Driving</h1>
+            <nav>
+                <a href="#features" class="mx-2 nav-link">Features</a>
+                <a href="#download" class="mx-2 nav-link">Download</a>
+                <a href="#legal" class="mx-2 nav-link" onclick="scrollToLegal('terms')">Terms of Use</a>
+                <a href="#legal" class="mx-2 nav-link" onclick="scrollToLegal('privacy')">Privacy Policy</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-bg h-[80vh] flex items-center justify-center text-center text-white" id="hero">
+        <div class="panel bg-opacity-70 p-8 rounded-lg">
+            <h2 class="text-4xl md:text-6xl font-bold mb-4">Horizon World Driving</h2>
+            <p class="text-xl mb-6">Experience the ultimate open-world racing adventure!</p>
+            <a href="#download" class="custom-btn text-white px-6 py-3 rounded-full">Get it on iOS</a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-16 panel">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">Game Features</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <img src="Images/world_feature.png" alt="Open World" class="mx-auto mb-4 rounded-lg">
+                    <h3 class="text-xl font-semibold mb-2">Vast Open World</h3>
+                    <p>Explore diverse landscapes, from city streets to mountain roads.</p>
+                </div>
+                <div class="text-center">
+                    <img src="Images/upgrade_feature.png" alt="Custom Cars" class="mx-auto mb-4 rounded-lg">
+                    <h3 class="text-xl font-semibold mb-2">Customize Your Ride</h3>
+                    <p>Design and upgrade your dream cars with endless options.</p>
+                </div>
+                <div class="text-center">
+                    <img src="Images/friends_feature.png" alt="Multiplayer" class="mx-auto mb-4 rounded-lg">
+                    <h3 class="text-xl font-semibold mb-2">Race with Friends</h3>
+                    <p>Compete in thrilling multiplayer races across the globe.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section id="download" class="py-16 panel text-center">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold mb-6">Download Now</h2>
+            <p class="text-lg mb-8">Available exclusively on the App Store for iOS devices.</p>
+            <a href="https://www.apple.com/app-store/" target="_blank" class="inline-block">
+                <img src="Images/appstore_banner.png" alt="Download on the App Store" class="mx-auto appstore-img">
+            </a>
+        </div>
+    </section>
+
+    <!-- Legal Section -->
+    <section id="legal" class="py-16 panel">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">Legal Information</h2>
+            <div class="space-y-4">
+                <!-- Terms of Use -->
+                <div>
+                    <button class="w-full custom-btn text-white py-3 rounded-lg flex justify-between items-center px-4" onclick="toggleSection('terms')">
+                        <span>Terms of Use</span>
+                        <span id="terms-icon">+</span>
+                    </button>
+                    <div id="terms" class="hidden panel p-6 rounded-lg mt-2">
+                        <h3 class="text-2xl font-semibold mb-4">Terms of Use</h3>
+                        <p><strong>Last Updated: April 22, 2025</strong></p>
+                        <p>These Terms of Use ("Terms") govern your use of the mobile application "Horizon World Driving" ("Game"), provided by Funbooster SRL ("we," "us," or "our"). By downloading, installing, or using the Game on your iOS device, you agree to these Terms. If you do not agree, please do not use the Game.</p>
+                        <h4 class="text-xl font-semibold mt-4">1. General Provisions</h4>
+                        <p>
+                            1.1. These Terms constitute a legally binding agreement between you and Funbooster SRL regarding your use of the Game.<br>
+                            1.2. We may update these Terms at any time. The updated Terms will be available within the Game or on our website. Continued use of the Game after changes constitutes your acceptance.<br>
+                            1.3. The Game is available on iOS devices through the Apple App Store, subject to Apple’s terms and conditions.
+                        </p>
+                        <h4 class="text-xl font-semibold mt-4">2. License</h4>
+                        <p>
+                            2.1. We grant you a limited, non-exclusive, non-transferable, revocable license to use the Game for personal, non-commercial purposes, subject to these Terms.<br>
+                            2.2. You may not: modify, disassemble, decompile, or reverse-engineer the Game; distribute, sell, or sublicense the Game; use the Game for any illegal or unauthorized purpose.
+                        </p>
+                        <h4 class="text-xl font-semibold mt-4">3. Eligibility</h4>
+                        <p>
+                            3.1. You must be at least 13 years old to use the Game. If you are under 18, you must have permission from a parent or legal guardian.<br>
+                            3.2. By using the Game, you represent that you meet these eligibility requirements.
+                        </p>
+                        <h4 class="text-xl font-semibold mt-4">4. User Conduct</h4>
+                        <p>
+                            4.1. You agree not to: use cheats, hacks, or unauthorized modifications; engage in harassing, abusive, or harmful behavior toward other players; exploit errors or bugs in the Game; use the Game to violate any applicable laws.<br>
+                            4.2. We reserve the right to suspend or terminate your access to the Game for violations of these Terms.
+                        </p>
+                        <h4 class="text-xl font-semibold mt-4">5. In-Game Purchases</h4>
+                        <p>
+                            5.1. The Game may offer in-app purchases (e.g., virtual currency, premium vehicles, or subscriptions).<br>
+                            5.2. All purchases are processed through the Apple App Store and subject to Apple’s payment terms.<br>
+                            5.3. Purchases are final and non-refundable, except as required by law or Apple’s policies.<br>
+                            5.4. You are responsible for any charges incurred, including applicable taxes.
+                        </p>
+                        <h4 class="text-xl font-semibold mt-4">6. Intellectual Property</h4>
+                        <p>
+                            6.1. All content in the Game, including graphics, music, code, and designs, is owned by Funbooster SRL or our licensors and protected by copyright, trademark, and other laws.<br>
+                            6.2. You may not copy, reproduce, or distribute any Game content without our written permission.
+                        </p>
+                        <h4 class="text-xl font-semibold mt-4">7. User-Generated Content</h4>
+                        <p>
+                            7.1. If the Game allows you to create or share content (e.g., custom vehicles or tracks), you grant us a worldwide, royalty-free, perpetual license to use, modify, and distribute that content in connection with the Game.<br>
+                            7.2. You are responsible for ensuring your content does not infringe on third-party rights or violate applicable laws.
+                        </p>
+                        <h4 class="text-xl font-semibold mt-4">8. Updates and Maintenance</h4>
+                        <p>
+                            8.1. We may update the Game to add features, fix bugs, or improve performance. Updates may require additional storage or internet access.<br>
+                            8.2. We may temporarily suspend access to the Game for maintenance without prior notice.
+                        </p>
+                        <h4 class="text-xl font-semibold mt-4">9. Disclaimers</h4>
+                        <p>
+                            9.1. The Game is provided "as is" without warranties of any kind, express or implied.<br>
+                            9.2. We do not guarantee that the Game will be error-free, secure, or always available.<br>
+                            9.3. You use the Game at your own risk.
+                        </p>
+                        <h4 class="text-xl font-semibold mt-4">10. Limitation of Liability</h4>
+                        <p>
+                            10.1. To the fullest extent permitted by law, Funbooster SRL is not liable for any indirect, incidental, or consequential damages arising from your use of the Game.<br>
+                            10.2. Our liability is limited to the amount you paid for the Game or in-app purchases, if any.
+                        </p>
+                        <h4 class="text-xl font-semibold mt-4">11. Termination</h4>
+                        <p>
+                            11.1. We may suspend or terminate your access to the Game at our discretion, including for violations of these Terms.<br>
+                            11.2. Upon termination, your license to use the Game ends, and you must delete the Game from your device.
+                        </p>
+                        <h4 class="text-xl font-semibold mt-4">12. Governing Law</h4>
+                        <p>
+                            12.1. These Terms are governed by the laws of Romania, without regard to conflict of law principles.<br>
+                            12.2. Any disputes will be resolved in the courts of Bucharest, Romania, unless otherwise required by law.
+                        </p>
+                        <h4 class="text-xl font-semibold mt-4">13. Contact</h4>
+                        <p>
+                            For questions about these Terms, contact us at:<br>
+                            <strong>Email</strong>: support@funbooster.com<br>
+                            <strong>Address</strong>: Funbooster SRL, mun. Chişinău, sec. Buiucani, str. 31 August 1989, 123, ap.(of.) 16, Chisinau, Moldova
+                        </p>
+                    </div>
+                </div>
+                <!-- Privacy Policy -->
+                <div>
+                    <button class="w-full custom-btn text-white py-3 rounded-lg flex justify-between items-center px-4" onclick="toggleSection('privacy')">
+                        <span>Privacy Policy</span>
+                        <span id="privacy-icon">+</span>
+                    </button>
+                    <div id="privacy" class="hidden panel p-6 rounded-lg mt-2">
+                        <h3 class="text-2xl font-semibold mb-4">Privacy Policy</h3>
+                        <p><strong>Last Updated: April 22, 2025</strong></p>
+                        <p>Funbooster SRL ("we," "us," or "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and share information when you use the mobile application "Horizon World Driving" ("Game") on your iOS device.</p>
+                        <h4 class="text-xl font-semibold mt-4">1. Information We Collect</h4>
+                        <h5 class="text-lg font-medium mt-2">1.1. Information You Provide</h5>
+                        <p>
+                            - <strong>Account Information</strong>: If you create an account, we may collect your username, email address, and password.<br>
+                            - <strong>User-Generated Content</strong>: If you create or share content (e.g., custom vehicles or tracks), we collect that content.<br>
+                            - <strong>Communications</strong>: If you contact us, we collect your name, email, and message content.
+                        </p>
+                        <h5 class="text-lg font-medium mt-2">1.2. Automatically Collected Information</h5>
+                        <p>
+                            - <strong>Device Information</strong>: We collect your device type, iOS version, IP address, unique device identifiers, and advertising IDs (e.g., IDFA, with your consent).<br>
+                            - <strong>Gameplay Data</strong>: We collect data about your in-game activities, such as progress, achievements, purchases, and interactions.<br>
+                            - <strong>Analytics</strong>: We use third-party tools (e.g., Firebase, GameAnalytics) to collect anonymized data about how you use the Game, including session duration and feature usage.
+                        </p>
+                        <h5 class="text-lg font-medium mt-2">1.3. Information from Third Parties</h5>
+                        <p>
+                            - <strong>Apple Sign-In</strong>: If you use Apple Sign-In, we may receive your name and email (if you choose to share them).<br>
+                            - <strong>Game Center</strong>: If you connect to Game Center, we collect your Game Center ID, leaderboard data, and achievements.<br>
+                            - <strong>Advertising Partners</strong>: With your consent, we may receive anonymized data from advertising networks to serve targeted ads.
+                        </p>
+                        <h4 class="text-xl font-semibold mt-4">2. How We Use Your Information</h4>
+                        <p>
+                            We use your information to:<br>
+                            - Provide, operate, and improve the Game.<br>
+                            - Process in-app purchases and deliver rewards.<br>
+                            - Personalize your experience (e.g., recommend vehicles or events).<br>
+                            - Serve targeted advertisements (with your consent).<br>
+                            - Analyze usage trends to enhance gameplay.<br>
+                            - Respond to your inquiries or support requests.<br>
+                            - Comply with legal obligations.
+                        </p>
+                        <h4 class="text-xl font-semibold mt-4">3. Sharing Your Information</h4>
+                        <p>
+                            We may share your information with:<br>
+                            - <strong>Service Providers</strong>: Third-party vendors (e.g., analytics, payment processors, or ad networks) who help us operate the Game.<br>
+                            - <strong>Legal Authorities</strong>: If required by law or to protect our rights.<br>
+                            - <strong>Business Transfers</strong>: In connection with a merger, acquisition, or sale of assets.<br>
+                            - <strong>Other Players</strong>: If you share content (e.g., custom vehicles), it may be visible to other players.<br>
+                            We do not sell your personal information to third parties.
+                        </p>
+                        <h4 class="text-xl font-semibold mt-4">4. Legal Basis for Processing (GDPR)</h4>
+                        <p>
+                            If you are in the European Economic Area (EEA), we process your data based on:<br>
+                            - <strong>Contract</strong>: To provide the Game and process purchases.<br>
+                            - <strong>Consent</strong>: For targeted ads or certain analytics.<br>
+                            - <strong>Legitimate Interests</strong>: To improve the Game and prevent fraud.<br>
+                            - <strong>Legal Obligation</strong>: To comply with applicable laws.
+                        </p>
+                        <h4 class="text-xl font-semibold mt-4">5. Your Choices</h4>
+                        <p>
+                            - <strong>Account Information</strong>: You can update or delete your account in the Game’s settings (subject to our retention policies).<br>
+                            - <strong>Apple Sign-In</strong>: You can manage data shared via Apple Sign-In in your Apple ID settings.<br>
+                            - <strong>Advertising IDs</strong>: You can limit ad tracking via your iOS device’s privacy settings.<br>
+                            - <strong>Analytics</strong>: You can opt out of certain analytics via the Game’s settings or your device’s privacy settings.
+                        </p>
+                        <h4 class="text-xl font-semibold mt-4">6. Children’s Privacy</h4>
+                        <p>
+                            6.1. The Game is not intended for children under 13. We do not knowingly collect personal information from children under 13.<br>
+                            6.2. If we learn we have collected such information, we will delete it promptly.
+                        </p>
+                        <h4 class="text-xl font-semibold mt-4">7. Data Security</h4>
+                        <p>
+                            7.1. We use reasonable technical and organizational measures to protect your information.<br>
+                            7.2. However, no system is completely secure. You are responsible for keeping your account credentials safe.
+                        </p>
+                        <h4 class="text-xl font-semibold mt-4">8. International Transfers</h4>
+                        <p>
+                            8.1. Your information may be transferred to and processed in Romania or other countries where our service providers operate.<br>
+                            8.2. We comply with applicable data protection laws for such transfers, including GDPR requirements for EEA residents.
+                        </p>
+                        <h4 class="text-xl font-semibold mt-4">9. Data Retention</h4>
+                        <p>
+                            9.1. We retain your information for as long as your account is active or as needed to provide the Game.<br>
+                            9.2. We may retain certain data to comply with legal obligations, resolve disputes, or enforce our agreements.
+                        </p>
+                        <h4 class="text-xl font-semibold mt-4">10. Your Rights</h4>
+                        <p>
+                            10.1. Depending on your location (e.g., EEA, California), you may have rights to:<br>
+                            - Access, rectify, or erase your personal data.<br>
+                            - Restrict or object to processing.<br>
+                            - Data portability.<br>
+                            - Opt out of the sale of personal information (note: we do not sell your data).<br>
+                            10.2. To exercise these rights, contact us at funboostersrl@gmail.com.<br>
+                            10.3. We will respond within the timeframes required by law (e.g., 30 days for GDPR, 45 days for CCPA).
+                        </p>
+                        <h4 class="text-xl font-semibold mt-4">11. Third-Party Services</h4>
+                        <p>
+                            11.1. The Game may include links to third-party services (e.g., Game Center, ad networks). These services have their own privacy policies, which we do not control.<br>
+                            11.2. Review the privacy policies of third-party services you use with the Game.
+                        </p>
+                        <h4 class="text-xl font-semibold mt-4">12. Changes to This Policy</h4>
+                        <p>
+                            12.1. We may update this Privacy Policy at any time. We will notify you of significant changes via the Game or email.<br>
+                            12.2. Continued use of the Game after changes constitutes your acceptance.
+                        </p>
+                        <h4 class="text-xl font-semibold mt-4">13. Contact</h4>
+                        <p>
+                            For questions or to exercise your privacy rights, contact us at:<br>
+                            <strong>Email</strong>: funboostersrl@gmail.com<br>
+                            <strong>Address</strong>: Funbooster SRL, mun. Chişinău, sec. Buiucani, str. 31 August 1989, 123, ap.(of.) 16, Chisinau, Moldova
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="panel text-white py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p>© 2025 Funbooster SRL. All rights reserved.</p>
+            <p class="mt-2">
+                <a href="#legal" class="hover:underline nav-link" onclick="scrollToLegal('terms')">Terms of Use</a> |
+                <a href="#legal" class="hover:underline nav-link" onclick="scrollToLegal('privacy')">Privacy Policy</a> |
+                <a href="mailto:funboostersrl@gmail.com" class="hover:underline nav-link">Contact Us</a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const icon = document.getElementById(`${sectionId}-icon`);
+            const otherSectionId = sectionId === 'terms' ? 'privacy' : 'terms';
+            const otherSection = document.getElementById(otherSectionId);
+            const otherIcon = document.getElementById(`${otherSectionId}-icon`);
+
+            if (section.classList.contains('hidden')) {
+                section.classList.remove('hidden');
+                icon.textContent = '−';
+                // Close the other section if open
+                if (!otherSection.classList.contains('hidden')) {
+                    otherSection.classList.add('hidden');
+                    otherIcon.textContent = '+';
+                }
+            } else {
+                section.classList.add('hidden');
+                icon.textContent = '+';
             }
         }
-        return gk_fileData[filename] || "";
+
+        function scrollToLegal(sectionId) {
+            const legalSection = document.getElementById('legal');
+            legalSection.scrollIntoView({ behavior: 'smooth' });
+            // Ensure the target section is open
+            setTimeout(() => {
+                const section = document.getElementById(sectionId);
+                if (section.classList.contains('hidden')) {
+                    toggleSection(sectionId);
+                }
+            }, 500); // Delay to allow scrolling to complete
         }
-        </script><!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Horizon World Driving - Funbooster SRL</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body {
-      background-color: #232323;
-      color: #ffffff;
-    }
-      .hero-bg {
-          background-image: url('Images/backround.png');
-          background-size: cover;
-          background-position: center;
-      }
-    .panel {
-      background-color: #000000;
-    }
-    .custom-btn {
-      background-color: #F72F6C;
-    }
-    .custom-btn:hover {
-      background-color: #E11F5C;
-    }
-  </style>
-</head>
-<body class="font-sans">
-  <!-- Header -->
-  <header class="panel text-white py-4">
-    <div class="container mx-auto px-4 flex justify-between items-center">
-      <h1 class="text-2xl font-bold">Horizon World Driving</h1>
-      <nav>
-        <a href="#features" class="mx-2 hover:underline">Features</a>
-        <a href="#download" class="mx-2 hover:underline">Download</a>
-        <a href="#legal" class="mx-2 hover:underline">Legal</a>
-      </nav>
-    </div>
-  </header>
 
-  <!-- Hero Section -->
-  <section class="hero-bg h-[80vh] flex items-center justify-center text-center text-white">
-    <div class="panel bg-opacity-70 p-8 rounded-lg">
-      <h2 class="text-4xl md:text-6xl font-bold mb-4">Horizon World Driving</h2>
-      <p class="text-xl mb-6">Experience the ultimate open-world racing adventure!</p>
-      <a href="#download" class="custom-btn text-white px-6 py-3 rounded-full">Get it on iOS</a>
-    </div>
-  </section>
-
-  <!-- Features Section -->
-  <section id="features" class="py-16 panel">
-    <div class="container mx-auto px-4">
-      <h2 class="text-3xl font-bold text-center mb-12">Game Features</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div class="text-center">
-          <img src="Images/world_feature.png" alt="Open World" class="mx-auto mb-4 rounded-lg">
-          <h3 class="text-xl font-semibold mb-2">Vast Open World</h3>
-          <p>Explore diverse landscapes, from city streets to mountain roads.</p>
-        </div>
-        <div class="text-center">
-          <img src="Images/upgrade_feature.png" alt="Custom Cars" class="mx-auto mb-4 rounded-lg">
-          <h3 class="text-xl font-semibold mb-2">Customize Your Ride</h3>
-          <p>Design and upgrade your dream cars with endless options.</p>
-        </div>
-        <div class="text-center">
-          <img src="Images/friends_feature.png" alt="Multiplayer" class="mx-auto mb-4 rounded-lg">
-          <h3 class="text-xl font-semibold mb-2">Race with Friends</h3>
-          <p>Compete in thrilling multiplayer races across the globe.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Download Section -->
-  <section id="download" class="py-16 panel text-center">
-    <div class="container mx-auto px-4">
-      <h2 class="text-3xl font-bold mb-6">Download Now</h2>
-      <p class="text-lg mb-8">Available exclusively on the App Store for iOS devices.</p>
-      <a href="https://www.apple.com/app-store/" target="_blank" class="inline-block">
-        <img src="Images/appstore_banner.png" alt="Download on the App Store" class="mx-auto">
-      </a>
-    </div>
-  </section>
-
-  <!-- Legal Section -->
-  <section id="legal" class="py-16 panel">
-    <div class="container mx-auto px-4">
-      <h2 class="text-3xl font-bold text-center mb-12">Legal Information</h2>
-      <div class="space-y-4">
-        <!-- Terms of Use -->
-        <div>
-          <button class="w-full custom-btn text-white py-3 rounded-lg flex justify-between items-center px-4" onclick="toggleSection('terms')">
-            <span>Terms of Use</span>
-            <span id="terms-icon">+</span>
-          </button>
-          <div id="terms" class="hidden panel p-6 rounded-lg mt-2">
-            <h3 class="text-2xl font-semibold mb-4">Terms of Use</h3>
-            <p><strong>Last Updated: April 22, 2025</strong></p>
-            <p>These Terms of Use ("Terms") govern your use of the mobile application "Horizon World Driving" ("Game"), provided by Funbooster SRL ("we," "us," or "our"). By downloading, installing, or using the Game on your iOS device, you agree to these Terms. If you do not agree, please do not use the Game.</p>
-            <h4 class="text-xl font-semibold mt-4">1. General Provisions</h4>
-            <p>1.1. These Terms constitute a legally binding agreement between you and Funbooster SRL regarding your use of the Game.<br>
-               1.2. We may update these Terms at any time. The updated Terms will be available within the Game or on our website. Continued use of the Game after changes constitutes your acceptance.<br>
-               1.3. The Game is available on iOS devices through the Apple App Store, subject to Apple’s terms and conditions.</p>
-            <h4 class="text-xl font-semibold mt-4">2. License</h4>
-            <p>2.1. We grant you a limited, non-exclusive, non-transferable, revocable license to use the Game for personal, non-commercial purposes, subject to these Terms.<br>
-               2.2. You may not: modify, disassemble, decompile, or reverse-engineer the Game; distribute, sell, or sublicense the Game; use the Game for any illegal or unauthorized purpose.</p>
-            <h4 class="text-xl font-semibold mt-4">3. Eligibility</h4>
-            <p>3.1. You must be at least 13 years old to use the Game. If you are under 18, you must have permission from a parent or legal guardian.<br>
-               3.2. By using the Game, you represent that you meet these eligibility requirements.</p>
-            <h4 class="text-xl font-semibold mt-4">4. User Conduct</h4>
-            <p>4.1. You agree not to: use cheats, hacks, or unauthorized modifications; engage in harassing, abusive, or harmful behavior toward other players; exploit errors or bugs in the Game; use the Game to violate any applicable laws.<br>
-               4.2. We reserve the right to suspend or terminate your access to the Game for violations of these Terms.</p>
-            <h4 class="text-xl font-semibold mt-4">5. In-Game Purchases</h4>
-            <p>5.1. The Game may offer in-app purchases (e.g., virtual currency, premium vehicles, or subscriptions).<br>
-               5.2. All purchases are processed through the Apple App Store and subject to Apple’s payment terms.<br>
-               5.3. Purchases are final and non-refundable, except as required by law or Apple’s policies.<br>
-               5.4. You are responsible for any charges incurred, including applicable taxes.</p>
-            <h4 class="text-xl font-semibold mt-4">6. Intellectual Property</h4>
-            <p>6.1. All content in the Game, including graphics, music, code, and designs, is owned by Funbooster SRL or our licensors and protected by copyright, trademark, and other laws.<br>
-               6.2. You may not copy, reproduce, or distribute any Game content without our written permission.</p>
-            <h4 class="text-xl font-semibold mt-4">7. User-Generated Content</h4>
-            <p>7.1. If the Game allows you to create or share content (e.g., custom vehicles or tracks), you grant us a worldwide, royalty-free, perpetual license to use, modify, and distribute that content in connection with the Game.<br>
-               7.2. You are responsible for ensuring your content does not infringe on third-party rights or violate applicable laws.</p>
-            <h4 class="text-xl font-semibold mt-4">8. Updates and Maintenance</h4>
-            <p>8.1. We may update the Game to add features, fix bugs, or improve performance. Updates may require additional storage or internet access.<br>
-               8.2. We may temporarily suspend access to the Game for maintenance without prior notice.</p>
-            <h4 class="text-xl font-semibold mt-4">9. Disclaimers</h4>
-            <p>9.1. The Game is provided "as is" without warranties of any kind, express or implied.<br>
-               9.2. We do not guarantee that the Game will be error-free, secure, or always available.<br>
-               9.3. You use the Game at your own risk.</p>
-            <h4 class="text-xl font-semibold mt-4">10. Limitation of Liability</h4>
-            <p>10.1. To the fullest extent permitted by law, Funbooster SRL is not liable for any indirect, incidental, or consequential damages arising from your use of the Game.<br>
-                10.2. Our liability is limited to the amount you paid for the Game or in-app purchases, if any.</p>
-            <h4 class="text-xl font-semibold mt-4">11. Termination</h4>
-            <p>11.1. We may suspend or terminate your access to the Game at our discretion, including for violations of these Terms.<br>
-                11.2. Upon termination, your license to use the Game ends, and you must delete the Game from your device.</p>
-            <h4 class="text-xl font-semibold mt-4">12. Governing Law</h4>
-            <p>12.1. These Terms are governed by the laws of Romania, without regard to conflict of law principles.<br>
-                12.2. Any disputes will be resolved in the courts of Bucharest, Romania, unless otherwise required by law.</p>
-            <h4 class="text-xl font-semibold mt-4">13. Contact</h4>
-            <p>
-                For questions about these Terms, contact us at:<br>
-                <strong>Email</strong>: support@funbooster.com<br>
-                <strong>Address</strong>: Funbooster SRL, Funbooster SRL, mun. Chişinău, sec. Buiucani, str. 31 August 1989, 123, ap.(of.) 16, Chisinau, Moldova
-            </p>
-          </div>
-        </div>
-        <!-- Privacy Policy -->
-        <div>
-          <button class="w-full custom-btn text-white py-3 rounded-lg flex justify-between items-center px-4" onclick="toggleSection('privacy')">
-            <span>Privacy Policy</span>
-            <span id="privacy-icon">+</span>
-          </button>
-          <div id="privacy" class="hidden panel p-6 rounded-lg mt-2">
-            <h3 class="text-2xl font-semibold mb-4">Privacy Policy</h3>
-            <p><strong>Last Updated: April 22, 2025</strong></p>
-            <p>Funbooster SRL ("we," "us," or "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and share information when you use the mobile application "Horizon World Driving" ("Game") on your iOS device.</p>
-            <h4 class="text-xl font-semibold mt-4">1. Information We Collect</h4>
-            <h5 class="text-lg font-medium mt-2">1.1. Information You Provide</h5>
-            <p>- <strong>Account Information</strong>: If you create an account, we may collect your username, email address, and password.<br>
-               - <strong>User-Generated Content</strong>: If you create or share content (e.g., custom vehicles or tracks), we collect that content.<br>
-               - <strong>Communications</strong>: If you contact us, we collect your name, email, and message content.</p>
-            <h5 class="text-lg font-medium mt-2">1.2. Automatically Collected Information</h5>
-            <p>- <strong>Device Information</strong>: We collect your device type, iOS version, IP address, unique device identifiers, and advertising IDs (e.g., IDFA, with your consent).<br>
-               - <strong>Gameplay Data</strong>: We collect data about your in-game activities, such as progress, achievements, purchases, and interactions.<br>
-               - <strong>Analytics</strong>: We use third-party tools (e.g., Firebase, GameAnalytics) to collect anonymized data about how you use the Game, including session duration and feature usage.</p>
-            <h5 class="text-lg font-medium mt-2">1.3. Information from Third Parties</h5>
-            <p>- <strong>Apple Sign-In</strong>: If you use Apple Sign-In, we may receive your name and email (if you choose to share them).<br>
-               - <strong>Game Center</strong>: If you connect to Game Center, we collect your Game Center ID, leaderboard data, and achievements.<br>
-               - <strong>Advertising Partners</strong>: With your consent, we may receive anonymized data from advertising networks to serve targeted ads.</p>
-            <h4 class="text-xl font-semibold mt-4">2. How We Use Your Information</h4>
-            <p>We use your information to:<br>
-               - Provide, operate, and improve the Game.<br>
-               - Process in-app purchases and deliver rewards.<br>
-               - Personalize your experience (e.g., recommend vehicles or events).<br>
-               - Serve targeted advertisements (with your consent).<br>
-               - Analyze usage trends to enhance gameplay.<br>
-               - Respond to your inquiries or support requests.<br>
-               - Comply with legal obligations.</p>
-            <h4 class="text-xl font-semibold mt-4">3. Sharing Your Information</h4>
-            <p>We may share your information with:<br>
-               - <strong>Service Providers</strong>: Third-party vendors (e.g., analytics, payment processors, or ad networks) who help us operate the Game.<br>
-               - <strong>Legal Authorities</strong>: If required by law or to protect our rights.<br>
-               - <strong>Business Transfers</strong>: In connection with a merger, acquisition, or sale of assets.<br>
-               - <strong>Other Players</strong>: If you share content (e.g., custom vehicles), it may be visible to other players.<br>
-               We do not sell your personal information to third parties.</p>
-            <h4 class="text-xl font-semibold mt-4">4. Legal Basis for Processing (GDPR)</h4>
-            <p>If you are in the European Economic Area (EEA), we process your data based on:<br>
-               - <strong>Contract</strong>: To provide the Game and process purchases.<br>
-               - <strong>Consent</strong>: For targeted ads or certain analytics.<br>
-               - <strong>Legitimate Interests</strong>: To improve the Game and prevent fraud.<br>
-               - <strong>Legal Obligation</strong>: To comply with applicable laws.</p>
-            <h4 class="text-xl font-semibold mt-4">5. Your Choices</h4>
-            <p>- <strong>Account Information</strong>: You can update or delete your account in the Game’s settings (subject to our retention policies).<br>
-               - <strong>Apple Sign-In</strong>: You can manage data shared via Apple Sign-In in your Apple ID settings.<br>
-               - <strong>Advertising IDs</strong>: You can limit ad tracking via your iOS device’s privacy settings.<br>
-               - <strong>Analytics</strong>: You can opt out of certain analytics via the Game’s settings or your device’s privacy settings.</p>
-            <h4 class="text-xl font-semibold mt-4">6. Children’s Privacy</h4>
-            <p>6.1. The Game is not intended for children under 13. We do not knowingly collect personal information from children under 13.<br>
-               6.2. If we learn we have collected such information, we will delete it promptly.</p>
-            <h4 class="text-xl font-semibold mt-4">7. Data Security</h4>
-            <p>7.1. We use reasonable technical and organizational measures to protect your information.<br>
-               7.2. However, no system is completely secure. You are responsible for keeping your account credentials safe.</p>
-            <h4 class="text-xl font-semibold mt-4">8. International Transfers</h4>
-            <p>8.1. Your information may be transferred to and processed in Romania or other countries where our service providers operate.<br>
-               8.2. We comply with applicable data protection laws for such transfers, including GDPR requirements for EEA residents.</p>
-            <h4 class="text-xl font-semibold mt-4">9. Data Retention</h4>
-            <p>9.1. We retain your information for as long as your account is active or as needed to provide the Game.<br>
-               9.2. We may retain certain data to comply with legal obligations, resolve disputes, or enforce our agreements.</p>
-            <h4 class="text-xl font-semibold mt-4">10. Your Rights</h4>
-            <p>
-                10.1. Depending on your location (e.g., EEA, California), you may have rights to:<br>
-                - Access, rectify, or erase your personal data.<br>
-                - Restrict or object to processing.<br>
-                - Data portability.<br>
-                - Opt out of the sale of personal information (note: we do not sell your data).<br>
-                10.2. To exercise these rights, contact us at funboostersrl@gmail.com.<br>
-                10.3. We will respond within the timeframes required by law (e.g., 30 days for GDPR, 45 days for CCPA).
-            </p>
-            <h4 class="text-xl font-semibold mt-4">11. Third-Party Services</h4>
-            <p>11.1. The Game may include links to third-party services (e.g., Game Center, ad networks). These services have their own privacy policies, which we do not control.<br>
-                11.2. Review the privacy policies of third-party services you use with the Game.</p>
-            <h4 class="text-xl font-semibold mt-4">12. Changes to This Policy</h4>
-            <p>12.1. We may update this Privacy Policy at any time. We will notify you of significant changes via the Game or email.<br>
-                12.2. Continued use of the Game after changes constitutes your acceptance.</p>
-            <h4 class="text-xl font-semibold mt-4">13. Contact</h4>
-            <p>
-                For questions or to exercise your privacy rights, contact us at:<br>
-                <strong>Email</strong>: funboostersrl@gmail.com<br>
-                <strong>Address</strong>: Funbooster SRL, mun. Chişinău, sec. Buiucani, str. 31 August 1989, 123, ap.(of.) 16, Chisinau, Moldova
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="panel text-white py-8">
-    <div class="container mx-auto px-4 text-center">
-      <p>© 2025 Funbooster SRL. All rights reserved.</p>
-      <p class="mt-2">
-        <a href="#legal" class="hover:underline">Terms of Use</a> |
-        <a href="#legal" class="hover:underline">Privacy Policy</a> |
-        <a href="mailto:funboostersrl@gmail.com" class="hover:underline">Contact Us</a>
-      </p>
-    </div>
-  </footer>
-
-  <script>
-    function toggleSection(sectionId) {
-      const section = document.getElementById(sectionId);
-      const icon = document.getElementById(`${sectionId}-icon`);
-      if (section.classList.contains('hidden')) {
-        section.classList.remove('hidden');
-        icon.textContent = '−';
-      } else {
-        section.classList.add('hidden');
-        icon.textContent = '+';
-      }
-    }
-  </script>
+        // Parallax effect for hero background
+        window.addEventListener('scroll', function () {
+            const hero = document.getElementById('hero');
+            const scrollPosition = window.pageYOffset;
+            const parallaxSpeed = 0.2; // Subtle parallax effect
+            hero.style.backgroundPositionY = -(scrollPosition * parallaxSpeed) + 'px';
+        });
+    </script>
 </body>
 </html>
